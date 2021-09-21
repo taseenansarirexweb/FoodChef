@@ -37,7 +37,7 @@
                 <button class="btn btn-danger btn-sm m-1" id="+" onclick="quantity(id)">+</button>
                 <label id="quantity"></label>
                 <button class="btn btn-danger btn-sm" id="-" onclick="quantity(id)">-</button>
-                <button class="btn btn-secondary" onclick="addIngred()">add</button>
+                <button class="btn btn-secondary" onclick="addIngred()" id="add">add</button>
                 <div class="input-group p-1">
                     <div class="input-group-prepend">
                         <span class="input-group-text">Recipe*</span>
@@ -76,10 +76,10 @@
         let food = [];
         document.getElementById("quantity").innerText = quant
         const quantity = (e) => {
-            if (e == "+") {
+            if (e == "+" ) {
                 quant += 1;
             }
-            else {
+            else if(quant>0){
                 quant -= 1;
             }
             document.getElementById("quantity").innerText = quant;
@@ -107,6 +107,7 @@
 
         function delFood(id) {
             food.splice(id, id + 1);
+            localStorage.setItem("food",JSON.stringify(food));
             showFood();
 
         }
@@ -128,23 +129,55 @@
             let list = '';
             for (let i = 0; i < ingred.length; i++) {
                 console.log(ingred[i].ingred)
-                list += `<li class="p-1 text-danger">${ingred[i].ingred}---${ingred[i].quant} <button id="${i}" class="btn btn-sm p-1" onclick="delIngred(id)">Delete</button></li>`;
+                list += `<li class="p-1 text-danger">
+                    ${ingred[i].ingred}\t${ingred[i].quant}\tspoon 
+                    <button id="${i}" class="btn btn-sm p-1" onclick="delIngred(id)">Delete</button>
+                    <button id="s${i}" class="btn btn-sm p-1" onclick="selectIngred(${i})">Edit</button>
+                    </li>`;
             }
 
             document.getElementById("list").innerHTML = `<ol>${list}</ol>`;
         }
 
 
-        function addFood() {
+        function addFood(){
+            let data = document.getElementById("ingred").value;
+            document.getElementById("ingred").value='';
+            if (quant != 0 && ingred.length ==0) {
+                ingred.push({ "ingred": data, "quant": quant });
+                quant=0;
+                document.getElementById("quantity").innerText = quant;
+            }
             let foodName = document.getElementById("food").value;
             let recipe = document.getElementById("recipe").value;
             let url = document.getElementById('url').value;
             if (foodName != '' && recipe != '' && url!='') {
                 food.push({ "foodName": foodName, "ingred": ingred, "recipe": recipe, "url": url });
-                console.log(food);
+                localStorage.setItem("food",JSON.stringify(food));
                 showFood();
             }
 
+        }
+        function selectIngred(id){
+            console.log(ingred)
+            document.getElementById("ingred").value = ingred[id].ingred;
+            document.getElementById("quantity").innerText = ingred[id].quant;
+            quant = ingred[id].quant;
+            document.getElementById("add").setAttribute("onclick",`updateIngred(${id})`)
+            document.getElementById("add").innerText="update";
+        }
+        function updateIngred(id){
+            data = document.getElementById("ingred").value;
+            if (quant != 0 && data != '') {
+                ingred[id].ingred=data;
+                ingred[id].quant=quant;
+            }
+            document.getElementById("ingred").value = "";
+            quant = 0;
+            document.getElementById("quantity").innerText = quant;
+            document.getElementById("add").setAttribute("onclick",`addIngred(${id})`)
+            document.getElementById("add").innerText="Add";
+            showIngred();
         }
 
 
@@ -160,24 +193,21 @@
                 console.log(food);
                 document.getElementById("btn").setAttribute("onclick", "addFood()");
                 document.getElementById("btn").innerText = "Submit";
+                localStorage.setItem("food",JSON.stringify(food));
                 showFood();
             }
 
         }
 
 
-        function showImg(link) {
-            document.getElementById("image").innerHTML = `<img src="${link}" alt="No Image Found">`;
-        }
-
-
-        function showFood() {
+        function showFood(){
+            food = JSON.parse(localStorage.getItem("food"))
             let table = '';
             list = '';
             for (i = 0; i < food.length; i++) {
                 list = '';
                 for (let j = 0; j < food[i].ingred.length; j++) {
-                    list += `<li>${food[i].ingred[j].ingred}--${food[i].ingred[j].quant}</li>`
+                    list += `<li>${food[i].ingred[j].ingred}\t${food[i].ingred[j].quant}\tspoon</li>`
                 }
                 table += `<tr onclick="selectFood(${i})">
                         <td><a href="${food[i].url}" target="_blank">${food[i].foodName}</a></td>
@@ -200,7 +230,7 @@
                 if (food[i].foodName.toUpperCase().indexOf(query) > -1) {
                     list = '';
                     for (let j = 0; j < food[i].ingred.length; j++) {
-                        list += `<li>${food[i].ingred[j].ingred}--${food[i].ingred[j].quant}</li>`
+                        list += `<li>${food[i].ingred[j].ingred}\t${food[i].ingred[j].quant}\tspoon</li>`
                     }
                     table += `<tr onclick="selectFood(${i})">
                                 <td><a href="${food[i].url}" target="_blank">${food[i].foodName}</a></td>
@@ -215,6 +245,7 @@
             }
             document.getElementById("table").innerHTML = table;
         }
+        showFood();
 
 
     </script>
