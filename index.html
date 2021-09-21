@@ -1,0 +1,224 @@
+<!-- <!DOCTYPE html> -->
+<html>
+
+<head>
+    <title>Food Chef</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">FOOD CHEF</a>
+    </nav>
+    <section class="row">
+        <div class="container-fluid col-sm-4">
+            <div class="container p-2">
+                <h2 class="text-white bg-info d-flex justify-content-center">Add Food</h2>
+                <input type="text" class="form-control" id="food" placeholder="Food Name*">
+                <label>
+                    <h4>Add Ingredient</h4>
+                </label>
+                <div id="list">
+
+                </div>
+                <input type="text" class="form-control" id="ingred" placeholder="Add Ingredient">
+                <button class="btn btn-danger btn-sm m-1" id="+" onclick="quantity(id)">+</button>
+                <label id="quantity"></label>
+                <button class="btn btn-danger btn-sm" id="-" onclick="quantity(id)">-</button>
+                <button class="btn btn-secondary" onclick="addIngred()">add</button>
+                <div class="input-group p-1">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Recipe*</span>
+                    </div>
+                    <textarea class="form-control" id="recipe" aria-label="With textarea"></textarea>
+                </div>
+                <input type="text" class="form-control" id="url" placeholder="Image URL*">
+                <button class="btn btn-success m-2" id="btn" onclick="addFood()">Submit</button>
+            </div>
+        </div>
+        <div class="container-fluid col-sm-6">
+            <div class="container p-2">
+                <input type="search" class="form-control" id="search" onkeyup="search()" placeholder="Search Item">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>FOOD</th>
+                            <th>INGREDIENT</th>
+                            <th>RECIPE</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="containter row" id="image">
+
+        </div>
+    </section>
+    <script>
+        let quant = 0;
+        let ingred = [];
+        let food = [];
+        document.getElementById("quantity").innerText = quant
+        const quantity = (e) => {
+            if (e == "+") {
+                quant += 1;
+            }
+            else {
+                quant -= 1;
+            }
+            document.getElementById("quantity").innerText = quant;
+        }
+
+        const addIngred = () => {
+            let data = document.getElementById("ingred").value;
+            if (quant != 0 && data != '') {
+                ingred.push({ "ingred": data, "quant": quant })
+            }
+            document.getElementById("ingred").value = "";
+            quant = 0;
+            document.getElementById("quantity").innerText = quant;
+            showIngred();
+
+        }
+
+
+        function delIngred(id) {
+            ingred.splice(id, id + 1);
+            showIngred();
+
+        }
+
+
+        function delFood(id) {
+            food.splice(id, id + 1);
+            showFood();
+
+        }
+
+
+        function selectFood(id) {
+            ingred = food[id].ingred;
+            document.getElementById("food").value = food[id].foodName;
+            document.getElementById("recipe").value = food[id].recipe;
+            document.getElementById("list").innerHTML
+            document.getElementById('url').value = food[id].url;
+            document.getElementById("btn").setAttribute("onclick", `updateFood(${id})`);
+            document.getElementById("btn").innerText = "Update";
+            showIngred();
+        }
+
+
+        function showIngred() {
+            let list = '';
+            for (let i = 0; i < ingred.length; i++) {
+                console.log(ingred[i].ingred)
+                list += `<li class="p-1 text-danger">${ingred[i].ingred}---${ingred[i].quant} <button id="${i}" class="btn btn-sm p-1" onclick="delIngred(id)">Delete</button></li>`;
+            }
+
+            document.getElementById("list").innerHTML = `<ol>${list}</ol>`;
+        }
+
+
+        function addFood() {
+            let foodName = document.getElementById("food").value;
+            let recipe = document.getElementById("recipe").value;
+            let url = document.getElementById('url').value;
+            if (foodName != '' && recipe != '' && url!='') {
+                food.push({ "foodName": foodName, "ingred": ingred, "recipe": recipe, "url": url });
+                console.log(food);
+                showFood();
+            }
+
+        }
+
+
+        function updateFood(id) {
+            let foodName = document.getElementById("food").value;
+            let recipe = document.getElementById("recipe").value;
+            let url = document.getElementById('url').value;
+            if (foodName != '' && recipe != ''&& url!='') {
+                food[id].foodName = foodName;
+                food[id].recipe = recipe;
+                food[id].url = url;
+                food[id].ingred = ingred;
+                console.log(food);
+                document.getElementById("btn").setAttribute("onclick", "addFood()");
+                document.getElementById("btn").innerText = "Submit";
+                showFood();
+            }
+
+        }
+
+
+        function showImg(link) {
+            document.getElementById("image").innerHTML = `<img src="${link}" alt="No Image Found">`;
+        }
+
+
+        function showFood() {
+            let table = '';
+            list = '';
+            for (i = 0; i < food.length; i++) {
+                list = '';
+                for (let j = 0; j < food[i].ingred.length; j++) {
+                    list += `<li>${food[i].ingred[j].ingred}--${food[i].ingred[j].quant}</li>`
+                }
+                table += `<tr onclick="selectFood(${i})">
+                        <td><a href="${food[i].url}" target="_blank">${food[i].foodName}</a></td>
+                        <td><ol>${list}</ol></td>
+                        <td>${food[i].recipe}</td>
+                        <td><button class="btn btn-denger btn-sm" id="${i}" onclick="delFood(id)">Delete</button></td>
+                        </tr>`;
+            }
+            ingred = [];
+            document.getElementById("table").innerHTML = table;
+            document.getElementById("food").value = '';
+            document.getElementById("recipe").value = '';
+            document.getElementById("list").innerHTML = '';
+            document.getElementById('url').value = '';
+        }
+        function search() { //This function is used to search in the list
+            table='';
+            query = document.getElementById('search').value.toUpperCase();
+            for (i = 0; i < food.length; i++) {
+                if (food[i].foodName.toUpperCase().indexOf(query) > -1) {
+                    list = '';
+                    for (let j = 0; j < food[i].ingred.length; j++) {
+                        list += `<li>${food[i].ingred[j].ingred}--${food[i].ingred[j].quant}</li>`
+                    }
+                    table += `<tr onclick="selectFood(${i})">
+                                <td><a href="${food[i].url}" target="_blank">${food[i].foodName}</a></td>
+                                <td><ol>${list}</ol></td>
+                                <td>${food[i].recipe}</td>
+                                <td><button class="btn btn-denger btn-sm" id="${i}" onclick="delFood(id)">Delete</button></td>
+                            </tr>`;
+                }
+            }
+            if (table == '') {
+                table+= "<tr><td>Records Not Found</td></tr>";
+            }
+            document.getElementById("table").innerHTML = table;
+        }
+
+
+    </script>
+
+</body>
+
+</html>
